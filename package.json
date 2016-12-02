@@ -1,8 +1,8 @@
 {
-  "name": "mock-js",
+  "name": "driven-js",
   "version": "1.0.0",
   "description": "",
-  "main": "src/mock.js",
+  "main": "src/driven.js",
   "scripts": {
     "test": "./node_modules/.bin/karma start"
   },
