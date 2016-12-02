@@ -1,0 +1,44 @@
+{
+    "should use setInterval": {
+        "execute callback asynchronously": [
+            "setInterval", [100, 1]
+        ],
+        "prevent collateral executions": [
+            "clearInterval"
+        ],
+        "check callback arguments": [
+            "length", 1,
+            "0", 1
+        ],
+        "check elapsed time": [
+            100
+        ]
+    },
+    "should use setTimeout": {
+        "execute callback asynchronously": [
+            "setTimeout", [200]
+        ],
+        "check callback arguments": [
+            "length", 0
+        ],
+        "check elapsed time": [
+            200
+        ]
+    },
+    "should use requestAnimationFrame": {
+        "bind callback arguments": [
+            [2, 3]
+        ],
+        "execute callback asynchronously": [
+            "requestAnimationFrame", []
+        ],
+        "check callback arguments": [
+            "length", 3,
+            "0", 2,
+            "1", 3
+        ],
+        "check elapsed time": [
+            0
+        ]
+    }
+}
