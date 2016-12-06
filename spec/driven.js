@@ -29,6 +29,10 @@ describe('Driven.js', function () {
         var start = performance.now();
         var id;
 
+        runStep('pass implicitly', function () {
+            done();
+        });
+
         runStep('bind callback arguments', function (args) {
             callback = Function.bind.apply(callback, [null].concat(args));
         });
