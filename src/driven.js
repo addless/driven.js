@@ -70,6 +70,9 @@ var forEachTest = (function () {
             case args == null:
                 return;
 
+            case stepFnc.length === 0:
+                return stepFnc();
+
             case endN <= args.length:
                 stepFnc.apply(null, args.slice(startN, endN));
                 return runStep(stepId, stepFnc, endN);

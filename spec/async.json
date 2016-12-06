@@ -40,5 +40,8 @@
         "check elapsed time": [
             0
         ]
+    },
+    "should pass implicitly": {
+        "pass implicitly": []
     }
 }
