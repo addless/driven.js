@@ -26,10 +26,12 @@ var forEachTest = (function () {
         return Function('return ' + json)();                // convert string to object
     }
 
-    // This function passes each test found within the JSON to jasmine.
-    // without it, we're unable to get jasmine to run the tests.
+    // This function passes each test found within the JSON to Jasmine.
+    // without it, we're unable to register tests with Jasmine.
     function parseTests(keyN, testFnc, tests) {
         var testId = Object.keys(tests)[keyN];
+        var stepIds = Object.keys(tests[testId] || {});
+        var stepFns = stepIds.map(function () { return null });
 
         switch (true) {
         case testId == null:
@@ -48,35 +50,53 @@ var forEachTest = (function () {
             return parseTests(keyN + 1, testFnc, tests);
         }
 
-        function runTest(done) {
-            window.runStep = runStep;
-
-            if (testFnc.length !== 0) {
-                testFnc(done);
-            }
-
-            if (testFnc.length === 0) {
-                testFnc();
-                done();
-            }
+        // This function is called by Jasmine.  It executes the test function with the appropriate global/local variables.
+        // Without it, Jasmine can't invoke the test function. 
+        function runTest(jasmineDoneFnc) {
+            window.runStep = defineStep;
+            testFnc(endTest.bind(null, jasmineDoneFnc));
+            if (!testFnc.length) endTest(jasmineDoneFnc);
         }
 
-        function runStep(stepId, stepFnc, prevN) {
-            var startN = prevN || 0;
+        // This function inserts a step definition at the appropriate place within the queue.
+        // Without it, we're unable to queue step definitions in the appropriate order.
+        function defineStep(stepId, stepFnc) {
+            var fncN = stepIds.indexOf(stepId);
+
+            stepFns[fncN] = stepFnc;
+            if (fncN === -1) return;
+            if (stepFns.indexOf(null) === -1) runSteps(0, 0);
+        }
+
+        // This function executes all defined steps.
+        // Without it we're unable to execute steps in the appropriate order, and with appropriate arguments.
+        function runSteps(stepN, startN) {
+            var stepId = stepIds[stepN];
             var args = tests[testId][stepId];
-            var endN = startN + stepFnc.length;
+            var endN = startN + stepFns[stepN].length;
 
             switch (true) {
             case args == null:
                 return;
 
-            case stepFnc.length === 0:
-                return stepFnc();
+            case stepFns[stepN].length === 0:
+                return stepFns[stepN]();
 
             case endN <= args.length:
-                stepFnc.apply(null, args.slice(startN, endN));
-                return runStep(stepId, stepFnc, endN);
+                stepFns[stepN].apply(null, args.slice(startN, endN));
+                return runSteps(stepN, endN);
+
+            case stepIds[stepN + 1] != null:
+                return runSteps(stepN + 1, 0);
             }
+        }
+
+        // This function verifies that all steps have been defined before calling Jasmine's "done" callback.
+        // Without it, we risk tests "passing" without every step being run.
+        function endTest(jasmineDoneFnc) {
+            var gapN = stepFns.indexOf(null);
+            if (gapN === -1) return jasmineDoneFnc();
+            throw Error('Undefined step: "' + stepIds[gapN] + '"');
         }
     }
 }());
