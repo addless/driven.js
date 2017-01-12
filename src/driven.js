@@ -62,32 +62,34 @@ var forEachTest = (function () {
         // Without it, we're unable to queue step definitions in the appropriate order.
         function defineStep(stepId, stepFnc) {
             var fncN = stepIds.indexOf(stepId);
+            var gapN = stepFns.indexOf(null);
 
             stepFns[fncN] = stepFnc;
             if (fncN === -1) return;
-            if (stepFns.indexOf(null) === -1) runSteps(0, 0);
+            if (fncN >= gapN) runSteps(fncN, 0);
         }
 
         // This function executes all defined steps.
         // Without it we're unable to execute steps in the appropriate order, and with appropriate arguments.
-        function runSteps(stepN, startN) {
-            var stepId = stepIds[stepN];
+        function runSteps(fncN, argN) {
+            var fnc = stepFns[fncN];
+            var stepId = stepIds[fncN];
             var args = tests[testId][stepId];
-            var endN = startN + stepFns[stepN].length;
 
             switch (true) {
+            case fnc == null:
             case args == null:
                 return;
 
-            case stepFns[stepN].length === 0:
-                return stepFns[stepN]();
+            case fnc.length === 0:
+                return fnc();
 
-            case endN <= args.length:
-                stepFns[stepN].apply(null, args.slice(startN, endN));
-                return runSteps(stepN, endN);
+            case argN + fnc.length <= args.length:
+                fnc.apply(null, args.slice(argN, argN + fnc.length));
+                return runSteps(fncN, argN + fnc.length);
 
-            case stepIds[stepN + 1] != null:
-                return runSteps(stepN + 1, 0);
+            case stepIds[fncN + 1] != null:
+                return runSteps(fncN + 1, 0);
             }
         }
 
