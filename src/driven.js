@@ -3,14 +3,14 @@ var forEachTest = (function () {
 
     // This function synchronous loads JSON at the given URL.
     // Without it, we're unable to incorporate the JSON data into the tests.
-    return function forEachTest(url, testFnc) {
+    return function forEachTest(url, testFunc) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, false);
         xhr.onloadend = afterLoad;
         xhr.send();
 
         function afterLoad() {
-            parseTests(0, testFnc, interpolate(xhr.responseText));
+            parseTests(0, testFunc, interpolate(xhr.responseText));
         }
     };
 
@@ -28,10 +28,8 @@ var forEachTest = (function () {
 
     // This function passes each test found within the JSON to Jasmine.
     // without it, we're unable to register tests with Jasmine.
-    function parseTests(keyN, testFnc, tests) {
+    function parseTests(keyN, testFunc, tests) {
         var testId = Object.keys(tests)[keyN];
-        var stepIds = Object.keys(tests[testId] || {});
-        var stepFns = stepIds.map(function () { return null });
 
         switch (true) {
         case testId == null:
@@ -39,66 +37,81 @@ var forEachTest = (function () {
 
         case testId.slice(0, 2) === 'f:':
             fit(testId.slice(2), runTest);
-            return parseTests(keyN + 1, testFnc, tests);
+            return parseTests(keyN + 1, testFunc, tests);
 
         case testId.slice(0, 2) === 'x:':
             xit(testId.slice(2), runTest);
-            return parseTests(keyN + 1, testFnc, tests);
+            return parseTests(keyN + 1, testFunc, tests);
 
         default:
             it(testId, runTest);
-            return parseTests(keyN + 1, testFnc, tests);
+            return parseTests(keyN + 1, testFunc, tests);
         }
 
         // This function is called by Jasmine.  It executes the test function with the appropriate global/local variables.
         // Without it, Jasmine can't invoke the test function. 
-        function runTest(jasmineDoneFnc) {
-            window.runStep = defineStep;
-            testFnc(endTest.bind(null, jasmineDoneFnc));
-            if (!testFnc.length) endTest(jasmineDoneFnc);
-        }
+        function runTest(jasmineDoneFunc) {
+            var stepAsync = [];
+            var stepArity = [];
+            var stepIds = Object.keys(tests[testId]);
+            var stepFuncs = stepIds.map(function () { return null });
 
-        // This function inserts a step definition at the appropriate place within the queue.
-        // Without it, we're unable to queue step definitions in the appropriate order.
-        function defineStep(stepId, stepFnc) {
-            var fncN = stepIds.indexOf(stepId);
-            var gapN = stepFns.indexOf(null);
+            window.endAsyncStep = throwAsyncError;
+            window.runAsyncStep = defineStep.bind(null, true);
+            window.runStep = defineStep.bind(null, false);
+            testFunc();
+            runSteps(0, 0);
 
-            stepFns[fncN] = stepFnc;
-            if (fncN === -1) return;
-            if (fncN >= gapN) runSteps(fncN, 0);
-        }
-
-        // This function executes all defined steps.
-        // Without it we're unable to execute steps in the appropriate order, and with appropriate arguments.
-        function runSteps(fncN, argN) {
-            var fnc = stepFns[fncN];
-            var stepId = stepIds[fncN];
-            var args = tests[testId][stepId];
-
-            switch (true) {
-            case fnc == null:
-            case args == null:
-                return;
-
-            case fnc.length === 0:
-                return fnc();
-
-            case argN + fnc.length <= args.length:
-                fnc.apply(null, args.slice(argN, argN + fnc.length));
-                return runSteps(fncN, argN + fnc.length);
-
-            case stepIds[fncN + 1] != null:
-                return runSteps(fncN + 1, 0);
+            // This function inserts a step definition at the appropriate place within the queue.
+            // Without it, we're unable to queue step definitions in the appropriate order.
+            function defineStep(async, stepId, stepFunc) {
+                var n = stepIds.indexOf(stepId);
+                stepArity[n] = stepFunc.length;
+                stepFuncs[n] = stepFunc;
+                stepAsync[n] = async;
             }
-        }
 
-        // This function verifies that all steps have been defined before calling Jasmine's "done" callback.
-        // Without it, we risk tests "passing" without every step being run.
-        function endTest(jasmineDoneFnc) {
-            var gapN = stepFns.indexOf(null);
-            if (gapN === -1) return jasmineDoneFnc();
-            throw Error('Undefined step: "' + stepIds[gapN] + '"');
+            // This function recursively executes all defined steps.
+            // Without it we're unable to execute steps in the appropriate order, and with appropriate arguments.
+            function runSteps(stepN, startN) {
+                var args = tests[testId][stepIds[stepN]];
+                var endN = startN + stepArity[stepN];
+
+                window.endAsyncStep = throwAsyncError;
+
+                switch (true) {
+                default:
+                    return;
+
+                case stepFuncs[stepN] == null:
+                    throw Error('Missing step definition: "' + stepIds[stepN] + '"');
+
+                case endN <= args.length:
+                    break;
+
+                case stepFuncs[stepN + 1] != null:
+                    return runSteps(stepN + 1, 0);
+
+                case stepN + 1 === stepFuncs.length:
+                    return jasmineDoneFunc();
+                }
+
+                switch (true) {
+                case stepAsync[stepN] !== true:
+                    stepFuncs[stepN].apply(null, args.slice(startN, endN));
+                    return runSteps(stepN, endN || 1);
+
+                case stepAsync[stepN] === true:
+                    window.endAsyncStep = runSteps.bind(null, stepN, endN || 1);
+                    stepFuncs[stepN].apply(null, args.slice(startN, endN));
+                }
+            }
+
+            // This indicates that endAsyncStep() was called from outside of an asynchronous step by throwing an error.
+            // Without it, we risk having steps silently behave in unexpected ways when endAsyncStep() is called incorrectly.
+            function throwAsyncError() {
+                throw Error('endAsyncStep() should only be call from within an asynchronous step');
+            }
         }
     }
 }());
