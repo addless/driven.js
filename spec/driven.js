@@ -25,39 +25,38 @@ describe('Driven.js', function () {
         });
     });
 
-    forEachTest('base/spec/async.json', function (done) {
+    forEachTest('base/spec/async.json', function () {
         var start = performance.now();
-        var id;
+        var end, args, id;
 
-        runStep('pass implicitly', function () {
-            done();
+        runAsyncStep('pass implicitly', function () {
+            endAsyncStep();
         });
 
         runStep('bind callback arguments', function (args) {
             callback = Function.bind.apply(callback, [null].concat(args));
         });
 
-        runStep('execute callback asynchronously', function (key, args) {
+        runAsyncStep('execute callback asynchronously', function (key, args) {
             id = window[key].apply(window, [callback].concat(args));
         });
 
         function callback() {
-            var end = performance.now();
-            var args = arguments;
-
-            runStep('prevent collateral executions', function (key) {
-                window[key].call(window, id);
-            });
-
-            runStep('check callback arguments', function (key, val) {
-                expect(args[key]).toEqual(val);
-            });
-
-            runStep('check elapsed time', function (val) {
-                expect(end - start).toBeGreaterThan(val);
-            });
-
-            done();
+            end = performance.now();
+            args = arguments;
+            endAsyncStep();
         }
+
+        runStep('prevent collateral executions', function (key) {
+            window[key].call(window, id);
+        });
+
+        runStep('check callback arguments', function (key, val) {
+            expect(args[key]).toEqual(val);
+        });
+
+        runStep('check elapsed time', function (val) {
+            expect(end - start).toBeGreaterThan(val);
+        });
     });
 });
