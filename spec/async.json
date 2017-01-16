@@ -43,5 +43,13 @@
     },
     "should pass implicitly": {
         "pass implicitly": []
+    },
+    "should report the appropriate name": {
+        "execute callback asynchronously": [
+            "requestAnimationFrame", []
+        ],
+        "check the specs's full name": [
+            "Driven.js should report the appropriate name [check the specs's full name]"
+        ]
     }
 }
