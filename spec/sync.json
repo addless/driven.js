@@ -45,5 +45,10 @@
             "search", [" /^iiwvp9c0$/i "], 0,
             "search", [" /^IIWVP9C0$/ "], 0
         ]
+    },
+    "should report the appropriate name": {
+        "check the specs's full name": [
+            "Driven.js should report the appropriate name [check the specs's full name]"
+        ]
     }
 }
