@@ -49,7 +49,30 @@
             "requestAnimationFrame", []
         ],
         "check the specs's full name": [
-            "Driven.js should report the appropriate name [check the specs's full name]"
+            "Driven.js should report the appropriate name [Step: check the specs's full name (1st run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (2nd run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (3rd run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (4th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (5th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (6th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (7th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (8th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (9th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (10th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (11th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (12th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (13th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (14th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (15th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (16th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (17th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (18th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (19th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (20th run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (21st run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (22nd run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (23rd run)]",
+            "Driven.js should report the appropriate name [Step: check the specs's full name (24th run)]"
         ]
     }
 }
