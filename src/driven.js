@@ -39,12 +39,9 @@ var forEachTest = (function () {
                 describe(testId, runTest);
                 return parseTests(keyN + 1, testFunc, tests);
 
-            case testId.slice(0, 2) === 'f:':
-                fdescribe(testId.slice(2), runTest);
-                return parseTests(keyN + 1, testFunc, tests);
-
-            case testId.slice(0, 2) === 'x:':
-                xdescribe(testId.slice(2), runTest);
+            case 'f:' === testId.slice(0, 2):
+            case 'x:' === testId.slice(0, 2):
+                window[testId.slice(0, 1) + 'describe'](testId.slice(2), runTest);
                 return parseTests(keyN + 1, testFunc, tests);
         }
 
