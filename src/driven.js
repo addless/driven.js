@@ -26,8 +26,8 @@ var forEachTest = (function () {
         return Function('return ' + json)();                // convert string to object
     }
 
-    // This function passes each test found within the JSON to Jasmine.
-    // without it, we're unable to register tests with Jasmine.
+    // This function passes each test found within the JSON to the test framework.
+    // without it, we're unable to register tests with the test framework.
     function parseTests(keyN, testFunc, tests) {
         var testId = Object.keys(tests)[keyN];
 
@@ -45,8 +45,8 @@ var forEachTest = (function () {
                 return parseTests(keyN + 1, testFunc, tests);
         }
 
-        // This function is called by Jasmine.  It executes the test function with the appropriate global/local variables.
-        // Without it, Jasmine can't invoke the test function.
+        // This function is called by the test framework.  It executes the test function with the appropriate global/local variables.
+        // Without it, the test framework can't invoke the test function.
         function runTest() {
             var count = 0;
             var nullN = 0;
@@ -93,9 +93,9 @@ var forEachTest = (function () {
                 }
             }
 
-            // This function is called by Jasmine.  It executes the step with the appropriate global-variables/arguments.
-            // Without it, Jasmine can't invoke the step.
-            function runStep(stepN, startN, jasmineDoneFunc) {
+            // This function is called by the test framework.  It executes the step with the appropriate global-variables/arguments.
+            // Without it, the test framework can't invoke the step.
+            function runStep(stepN, startN, the test frameworkDoneFunc) {
                 var args = tests[testId][stepIds[stepN]];
                 var endN = startN + stepArity[stepN];
 
@@ -103,14 +103,14 @@ var forEachTest = (function () {
 
                 switch (true) {
                     case endN > args.length:
-                        return jasmineDoneFunc();
+                        return the test frameworkDoneFunc();
 
                     case stepAsync[stepN] !== true:
                         stepFuncs[stepN].apply(null, args.slice(startN, endN));
-                        return runStep(stepN, endN || 1, jasmineDoneFunc);
+                        return runStep(stepN, endN || 1, the test frameworkDoneFunc);
 
                     case stepAsync[stepN] === true:
-                        window.endAsyncStep = runStep.bind(null, stepN, endN || 1, jasmineDoneFunc);
+                        window.endAsyncStep = runStep.bind(null, stepN, endN || 1, the test frameworkDoneFunc);
                         stepFuncs[stepN].apply(null, args.slice(startN, endN));
                 }
             }
